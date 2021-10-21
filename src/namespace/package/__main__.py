@@ -2,11 +2,11 @@
 
 from namespace.package import main
 import requests
-from bs4 import BeatifulSoup
+from bs4 import BeautifulSoup
 
 def main():
     page = requests.get("https://irozhlas.cz/")
-    # soup = BeatifulSoup(page.content, 'html.parser')
+    soup = BeatifulSoup(page.content, 'html.parser')
     print(page.text)
 
 if __name__ == "__main__":
