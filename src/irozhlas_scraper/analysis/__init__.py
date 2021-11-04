@@ -20,6 +20,8 @@ see for example http://soshnikov.com/mPyPl/
 
 """
 
+__all__ = tuple(["main"])
+
 
 # #############################################################################
 # Domain model: entities / value objects (mostly)
@@ -66,7 +68,7 @@ def save_texts(texts: Iterable[AnalysisResult]) -> None:
     print("The texts were saved!")
 
 
-if __name__ == "__main__":
+def main():
     try:
         # [1] Configure the application before run.
         GENEEA_PRIVATE_KEY: str = os.environ.get("GENEEA_KEY")

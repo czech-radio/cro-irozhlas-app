@@ -16,7 +16,7 @@ The program should be accessible from command line with apropriate interface e.g
 
 At this moment we think that the project can be splited into two parts (modules/packages).
 
-### 1. Downloader
+### 1. Scraper
 
 This module loads, parse raw page content and stores only relevant content.
 
@@ -34,6 +34,12 @@ This module uses the [Geenea](https://geneea.com/) REST API to analyze the artic
 
 - [ ] Use various technics to inspect the analyzed content.
   (This step is not yet well understood and wee will see what we get from the service.)
+
+#### Usage
+
+You need an Geenea API key. Set the value of `GENEEA_KEY` environment variable!
+
+    irozhlas-analyse
 
 ## Documentation
 
