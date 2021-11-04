@@ -25,7 +25,7 @@ jobs:
           python -m pip install -e ".[lint, test]"
       - name: Check package installation
         run: |
-          python -c 'import namespace.package; print(namespace.package.__version__)'
+          python -c 'import irozhlas_scraper; print(irozhlas_scraper.__version__)'
       - name: Execute tests
         run: |
           pytest

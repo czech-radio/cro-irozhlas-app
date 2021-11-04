@@ -1,8 +1,8 @@
 # irozhlas_scraper
 
-**Simple projects one-line description.**
+**The iRozhlas scraping service.**
 
-![main](https://github.com/groundf/Template-Python-Package/workflows/main/badge.svg) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+![main](https://github.com/czech-radio/irozhlas-scraper/workflows/main/badge.svg) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 [Ubuntu | macOS | Windows]
 
@@ -38,7 +38,6 @@ This module uses the [Geenea](https://geneea.com/) REST API to analyze the artic
 ## Documentation
 
 Here we write notes about our solution. What works and why? Don't hesitate to change the requirements alongside with this section.
-
 
 ## Description
 
