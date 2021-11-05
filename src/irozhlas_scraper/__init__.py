@@ -15,7 +15,6 @@ __version__ = "0.2.0"
 
 __all__ = tuple(["main"])
 
-
 class Page:
     """
     The fetched HTML page.
@@ -32,11 +31,11 @@ class Page:
         return self._id
 
     @property
-    def title(self) -> UUID:
+    def title(self) -> str:
         return self._title
 
     @property
-    def content(self) -> UUID:
+    def content(self) -> str:
         return self._content
 
     @property
@@ -48,6 +47,44 @@ class Page:
 
     def __hash__(self) -> int:
         return hash((type(self), self.id))
+
+
+
+class Article:
+    """
+    Article class
+    """
+
+    def __init__(self,id: UUID, title: str, content: str, created_at: date, link: str, category: str):
+        self._id = id
+        self._title = title
+        self._content = content
+        self._created_at = created_at
+        self._link = link
+        self._category = category
+
+    @property
+    def id(self) -> UUID:
+        return self._id
+
+    @property
+    def title(self) -> str:
+        return self._title
+
+    @property
+    def content(self) -> str:
+        return self._content
+
+    @property
+    def created_at(self) -> date:
+        return self._created_at
+
+    def __eq__(self, that) -> bool:
+        return (that is not None) and (self.id == that.id)
+
+    def __hash__(self) -> int:
+        return hash((type(self), self.id))
+
 
 
 # #############################################################################
