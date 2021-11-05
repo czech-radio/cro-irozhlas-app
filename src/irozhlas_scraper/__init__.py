@@ -147,7 +147,18 @@ def main():
 
     except Exception as ex:
         print(ex)
-    # soup = BeautifulSoup(index, 'html.parser')
-    # for link in soup.findAll('a', attrs={'href': re.compile(r"zpravy-domov")}):
-    #     print(link.get('href'))
-    #     articles.append(link.get('href'))
+
+
+    ### agregate links ###
+
+    articles = []
+
+    soup = BeautifulSoup(page.content, 'html.parser')
+    for link in soup.findAll('a', attrs={'href': re.compile(r"zpravy-domov")}):
+         articles.append(f"https://irozhlas.cz/{link.get('href')}" )
+
+    for link in soup.findAll('a', attrs={'href': re.compile(r"ekonomika")}):
+         articles.append(f"https://irozhlas.cz{link.get('href')}")
+
+    uniq_links = list(set(articles))
+    print(uniq_links)
