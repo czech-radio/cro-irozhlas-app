@@ -16,24 +16,8 @@ The program should be accessible from command line with apropriate interface e.g
 
 At this moment we think that the project can be splited into two parts (modules/packages).
 
-### 1. Scraper
-
-This module loads, parse raw page content and stores only relevant content.
-
-- [ ] Load the page content of [irozhlas.cz](https://www.irozhlas.cz/)
-- [ ] Parse only relevant content of the page i.e. the title and perex of articles.
-- [ ] Store the content to dedicated file or small database (SQLite?)
-
-NOTE We can also store the raw content, for the future reference e.g. if we find some bug in the parser.
-
-### 2. Analyzer
-
-This module uses the [Geenea](https://geneea.com/) REST API to analyze the articles and agaim stores the result.
-
-- [ ] Send the content to the Geenea service and get the analyzed result.
-
-- [ ] Use various technics to inspect the analyzed content.
-  (This step is not yet well understood and wee will see what we get from the service.)
+1. Scraper
+2. Analyzer
 
 #### Usage
 
