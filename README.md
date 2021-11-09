@@ -16,8 +16,8 @@ The program should be accessible from command line with apropriate interface e.g
 
 At this moment we think that the project can be splited into two parts (modules/packages).
 
-1. Scraper
-2. Analyzer
+1. `scraping`
+2. `analysis`
 
 #### Usage
 
