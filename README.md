@@ -2,9 +2,7 @@
 
 **The iRozhlas scraping service.**
 
-![main](https://github.com/czech-radio/irozhlas-scraper/workflows/main/badge.svg) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-
-[Ubuntu | macOS | Windows]
+![main](https://github.com/czech-radio/irozhlas-scraper/workflows/main/badge.svg) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black) [Ubuntu | macOS | Windows]
 
 ## Requirements
 
