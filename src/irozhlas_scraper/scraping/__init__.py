@@ -131,7 +131,7 @@ def fetch_article_from_link(url: str):
         content=result.content.decode("utf-8"),
         created_at=datetime.now().timestamp(),
         link=url,
-        category="testcategory"
+        category="testcategory",
     )
 
 
