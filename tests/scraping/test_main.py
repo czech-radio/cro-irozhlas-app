@@ -1,8 +1,8 @@
-from typing import get_origin
-from irozhlas_scraper import Page
+# -*- coding: utf-8 -*-
 
 from uuid import uuid4
-from datetime import date
+
+from irozhlas_scraper.scraping import Page
 
 
 def test_create_page():

@@ -1,6 +1,5 @@
-import pytest
+# -*- coding: utf-8 -*-
 
 
-@pytest.mark("scraper")
 def test_demo():
     assert True

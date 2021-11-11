@@ -1,6 +1,5 @@
-# -*- cofding: utf-8 -*.
+# -*- coding: utf-8 -*.
 
-from os import PathLike
 import re
 from bs4 import BeautifulSoup
 import requests
@@ -8,10 +7,7 @@ import requests
 from uuid import UUID, uuid4
 from datetime import date
 from datetime import datetime
-from pathlib import Path
 
-
-__version__ = "0.2.0"
 
 __all__ = tuple(["main"])
 
@@ -131,12 +127,13 @@ def fetch_article_from_link(url: str):
 
     return Article(
         id=uuid4(),
-        title="article"
+        title="article",
         content=result.content.decode("utf-8"),
         created_at=datetime.now().timestamp(),
         link=url,
         category="testcategory"
     )
+
 
 class IndexContentStore:
     """
