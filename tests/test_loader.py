@@ -1,8 +1,6 @@
-import unittest
+import pytest
 
-loader = unittest.TestLoader()
-start_dir = "./"
-suite = loader.discover(start_dir)
 
-runner = unittest.TextTestRunner()
-runner.run(suite)
+@pytest.mark("scraper")
+def test_demo():
+    assert True
