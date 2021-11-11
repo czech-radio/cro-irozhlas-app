@@ -112,7 +112,7 @@ def fetch_index(url: str) -> Page:
         id=uuid4(),
         title=f"irozhlas",
         content=result.content.decode("utf-8"),
-        created_at=datetime.now().timestamp(),  # Chceme timestamp?
+        created_at=datetime.now().timestamp(),
     )
 
 
@@ -123,6 +123,20 @@ def save_index(page: Page, path: str) -> None:
     with open(f"{path}/{file_name}", mode="w+", encoding="utf-8") as f:
         f.write(page.content)
 
+
+def fetch_article_from_link(url: str):
+    result = requests.get(url)
+    if not result.ok:
+        raise requests.HTTPError
+
+    return Article(
+        id=uuid4(),
+        title="article"
+        content=result.content.decode("utf-8"),
+        created_at=datetime.now().timestamp(),
+        link=url,
+        category="testcategory"
+    )
 
 class IndexContentStore:
     """
@@ -168,3 +182,11 @@ def main():
 
     uniq_links = list(set(articles))
     print(uniq_links)
+
+    all_articles = []
+
+    for link in uniq_links:
+        all_articles.append(fetch_article_from_link(link))
+
+    for article in all_articles:
+        print(f"{article.title}, {article.link}")
