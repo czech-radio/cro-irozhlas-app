@@ -1,16 +1,27 @@
-# iRozhlas Analysis with Geneea API
+# iRozhlas Analysis
 
-## Installation
+This service is responsible for analyzing the given article content by calling Geneea REST service and store the result in database.
 
-Add `GENEEA_KEY` to environment variables.
+## Setup
+
+Add `GENEEA_KEY` to the environment variables e.g. on Windows
+
+    >>> $env:GENEEA_KEY="YOUR-SERVICE-KEY"
+
+You can see the value by typing
+
+    >>> echo $env:GENEEA_KEY
 
 ## Usage
 
-Run
+Run the service via comman line as
 
-    python geneea-demo
+    irozhlas-analyse
 
-Results
+## Notes
+
+The results from Geneea API called over HTTP is JSON e.g.
+(we are still in the process of how to work with the result)
 
 ```json
 {
