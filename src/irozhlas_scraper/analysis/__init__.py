@@ -25,7 +25,7 @@ from typing import Dict, Optional
 from requests.exceptions import RequestException
 from typing import Protocol
 
-from dotenv import load_dotenv
+from dotenv import load_dotenv, dotenv_values
 
 
 __all__ = tuple(["main"])
@@ -203,8 +203,10 @@ class ArticleAnalysisService: # Facade
 
     def analyze_article(self, article_id: str): # ->  Result[None]
         """
-        Analyze an article with the given id.
+        Analyze an article with the given id and store the result.
+
         Return the analyzed article or None, when an article was not found in database.
+
         :raise: Exception when Geneea service is no reachable or article with given id was not found.
         """
         try:
@@ -254,21 +256,24 @@ def main(args=None) -> None:
         # ------------------------------------------------------------------------
         # CONFIGURE SERVICE
         # ------------------------------------------------------------------------
-        # config = dotenv_values(".env")
-        load_dotenv()  # Take environment variables from .env.
+        configuration: dict = dotenv_values(".env")
 
-        geneea_key = os.environ.get("GENEEA_KEY")
-        geneea_url = os.environ.get("GENEEA_URL")
+        if not bool(configuration):
+            GENEEA_KEY = os.environ.get("GENEEA_KEY")
+            GENEEA_URL = os.environ.get("GENEEA_URL")
+        else:
+            GENEEA_URL = configuration["GENEEA_URL"]
+            GENEEA_KEY = configuration["GENEEA_KEY"]
 
-        if geneea_key is None:
+        if GENEEA_KEY is None:
             print("Geneea key must be set!")
             sys.exit(1)
 
-        if geneea_url is None:
+        if GENEEA_URL is None:
             print("Geneea url must be set!")
             sys.exit(1)
 
-        geneea_client = GeneeaClient(geneea_url, geneea_key)
+        geneea_client = GeneeaClient(GENEEA_URL, GENEEA_KEY)
         article_storage = ArticleRepository()
         analysis_storage = AnalysisRepository()
 
