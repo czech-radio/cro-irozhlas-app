@@ -24,12 +24,28 @@ package can be viwed and used as a standalone application. They are currently ex
 
 ## Usage
 
-(You need a Geenea API key. Set the value of `GENEEA_KEY` environment variable!)
+Then you can use it as
 
     irozhlas-scrape ...
     irozhlas-analyse ...
 
 ## Setup
+
+### Set the environment variables
+
+You need a Geenea API key. Set the value of `GENEEA_KEY` environment variable!
+
+Set environment variables in Windows `cmd` console
+
+    > set GENEEA_KEY=...
+    > set GENEEA_URL=...
+
+Set environment variables in Windows `powershell` console
+
+    > $env:GENEEA_KEY=...
+    > $env:GENEEA_URL=...
+
+### Set the virtual environment
 
 Go to project directory `cd path/to/project` and create a virtual environment (Always use virtual environment!). You can create a virtual environment anywhere, but I prefer to keep it inside the project folder.
 
@@ -57,11 +73,11 @@ source venv/bin/activate
 Install all dependecies in editable mode.
 
 ```shell
-pip install ".[lint, test, docs]"
+pip install ".[lint, test, docs, web]"
 pytest
 ```
 
-### Docker
+### Docker container
 
 #### Build
 

@@ -23,6 +23,9 @@ from uuid import UUID
 from dataclasses import dataclass
 from typing import Dict, Optional
 from requests.exceptions import RequestException
+from typing import Protocol
+
+from dotenv import load_dotenv
 
 
 __all__ = tuple(["main"])
@@ -68,23 +71,31 @@ class ArticleAnalyzed(Command): # DTO
 #                                 SERVICE                                     #
 # ########################################################################### #
 
+# Clieants for external services such as REST services and so on.
+
 class GeneeaClient:
     """
     The Geneea service client is responsible for calling Geneea REST service
     and analyze the provided article.
     """
 
-    __URL__ = "https://api.geneea.com/v3/analysis/T:CRo-transcripts"
-
-    def __init__(self, credentials: str) -> None:
-        self._credentials = credentials
+    def __init__(self, url: str, key: str) -> None:
+        self._url = url
+        self._key = key
 
     @property
-    def credentials(self) -> str:
+    def key(self) -> str:
         """
-        :return The service credentials.
+        :return The service key.
         """
-        return self._credentials
+        return self._key
+
+    @property
+    def url(self) -> str:
+        """
+        :return The service url.
+        """
+        return self._url
 
     def process(self, article: Article) -> Analysis:
         """
@@ -96,10 +107,10 @@ class GeneeaClient:
         """
         headers = {
             "Article-type": "application/json",
-            "Authorization": f"user_key {self.credentials}"
+            "Authorization": f"user_key {self.key}"
         }
 
-        response = rq.post(type(self).__URL__, json = {"text": article.content}, headers=headers)
+        response = rq.post(self.url, json = {"text": article.content}, headers=headers)
 
         if response.status_code != 200:
             raise RequestException(f"Error for request with response status code {response.status_code}")
@@ -107,9 +118,11 @@ class GeneeaClient:
         return Analysis(id=article.id, content=response.json())
 
 
+# Repositories for loading and saving the aggregates (entites) from some storage.
+
 class ArticleRepository:
     """
-    The article repository is responsible for loading a and saving the articles
+    The repository is responsible for loading and saving the aggregate
     from and to the storage respectivelly.
 
     This is in-memory implementation.
@@ -117,19 +130,25 @@ class ArticleRepository:
     def __init__(self) -> None:
 
         self._storage: Dict[UUID, Article] = {
-            UUID("3107759e-fdf6-49ef-b224-3298926a20b7"): Article(UUID("3107759e-fdf6-49ef-b224-3298926a20b7"), "Lezec Ondra si po boulderingu polepšil, patří mu šestá postupová příčka."),
-            UUID("a4b2eeda-af0e-40ea-a654-1b7c0a6e984e"): Article(UUID("a4b2eeda-af0e-40ea-a654-1b7c0a6e984e"), "Hrozně jsem si přála hodit pro Janečka, posteskla si oštěpařka Špotáková"),
+            UUID("3107759e-fdf6-49ef-b224-3298926a20b7"):
+                Article(
+                    UUID("3107759e-fdf6-49ef-b224-3298926a20b7"),
+                    "Lezec Ondra si po boulderingu polepšil, patří mu šestá postupová příčka."),
+            UUID("a4b2eeda-af0e-40ea-a654-1b7c0a6e984e"):
+                Article(
+                    UUID("a4b2eeda-af0e-40ea-a654-1b7c0a6e984e"),
+                    "Hrozně jsem si přála hodit pro Janečka, posteskla si oštěpařka Špotáková"),
         }
 
     def find_one(self, id: UUID) -> Optional[Article]:
         """
-        Load a text from storage.
+        Load the article from the storage.
         """
         return self._storage[id] if id in self._storage else None
 
     def save_one(self, article: Article) -> None:
         """
-        Save the text to storage.
+        Save the article to storage.
         """
         if article.id not in self._storage:
             self._storage[article.id] = article
@@ -137,7 +156,7 @@ class ArticleRepository:
 
 class AnalysisRepository:
     """
-    The analysis repository is responsible for loading a and saving the analysis
+    The repository is responsible for loading and saving the aggregate
     from and to the storage respectivelly.
 
     This is in-memory implementation.
@@ -148,13 +167,13 @@ class AnalysisRepository:
 
     def find_one(self, id: UUID) -> Optional[Analysis]:
         """
-        Load a text from storage.
+        Load the analysis from the storage.
         """
         return self._storage[id] if id in self._storage else None
 
     def save_one(self, analysis: Analysis) -> None:
         """
-        Save the text to storage.
+        Save the analysis to the storage.
         """
         if analysis.id not in self._storage:
             self._storage[analysis.id] = analysis
@@ -167,6 +186,10 @@ class ArticleAnalysisService: # Facade
 
     - Analyze the article and store the analysis result.
     - Retrieve the analysis for the given article.
+
+    :param geneea_client: The client for Geneea service.
+    :param article_storage: The repository for loading and saving articles.
+    :param article_storage: The repository for loading and saving analyses.
     """
 
     def __init__(self,
@@ -188,7 +211,7 @@ class ArticleAnalysisService: # Facade
             # Convert the raw string to UUID.
             # The primitive string values are send to service from outside the domain e.g
             # via HTTP REST or CLI application.
-            article_id = UUID(article_id)
+            article_id = UUID(str(article_id))
 
             # Retrive the article from storages.
             article = self.article_storage.find_one(article_id)
@@ -231,13 +254,21 @@ def main(args=None) -> None:
         # ------------------------------------------------------------------------
         # CONFIGURE SERVICE
         # ------------------------------------------------------------------------
+        # config = dotenv_values(".env")
+        load_dotenv()  # Take environment variables from .env.
+
         geneea_key = os.environ.get("GENEEA_KEY")
+        geneea_url = os.environ.get("GENEEA_URL")
 
         if geneea_key is None:
-            print("Gennea key must be set!")
+            print("Geneea key must be set!")
             sys.exit(1)
 
-        geneea_client = GeneeaClient(geneea_key)
+        if geneea_url is None:
+            print("Geneea url must be set!")
+            sys.exit(1)
+
+        geneea_client = GeneeaClient(geneea_url, geneea_key)
         article_storage = ArticleRepository()
         analysis_storage = AnalysisRepository()
 
@@ -246,7 +277,6 @@ def main(args=None) -> None:
             article_storage = article_storage,
             analysis_storage = analysis_storage
         )
-
         # ------------------------------------------------------------------------
         # EXECUTE WORKFLOW
         # ------------------------------------------------------------------------
@@ -270,5 +300,6 @@ def main(args=None) -> None:
         sys.exit(0)
 
     except Exception as ex:
-        print(ex)
+        # print(ex)
+        raise ex
         sys.exit(1)
