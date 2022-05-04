@@ -184,9 +184,13 @@ def main():
     filtered = []
     for article in uniq_links:
         print(article)
-        filtered.append(article.replace("https://irozhlas.czhttps://www.irozhlas.cz","https://irozhlas.cz"))
+        filtered.append(
+            article.replace(
+                "https://irozhlas.czhttps://www.irozhlas.cz", "https://irozhlas.cz"
+            )
+        )
 
-    #print(uniq_links)
+    # print(uniq_links)
 
     all_articles = []
 
