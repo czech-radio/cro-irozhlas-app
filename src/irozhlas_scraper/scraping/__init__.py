@@ -120,14 +120,42 @@ def save_index(page: Page, path: str) -> None:
         f.write(page.content)
 
 
+def replace_strings(text: str) -> str:
+    """Replace common patterns to create title of an Article"""
+    return f"{text.replace('https://irozhlas.cz/','').replace('_',' ').replace('-',' ').replace('ekonomika/','')}"
+
+
+def filter_strings(articles: tuple[Article]) -> str:
+    """Filter out common mistakes in URL parsing"""
+    uniq_links = list(set(articles))
+
+    ### fix some typo
+    filtered = []
+    for article in uniq_links:
+        filtered.append(
+            article.replace(
+                "https://irozhlas.czhttps://www.irozhlas.cz", "https://irozhlas.cz"
+            )
+        )
+
+    all_articles = []
+
+    for link in filtered:
+        all_articles.append(fetch_article_from_link(link))
+
+
 def fetch_article_from_link(url: str) -> Article:
+    """
+    Calls IO/NET URL and returns Article object
+    """
+
     result = requests.get(url)
     if not result.ok:
         raise requests.HTTPError
 
     return Article(
         id=uuid4(),
-        title=f"{url.replace('https://irozhlas.cz/','').replace('_',' ').replace('-',' ').replace('ekonomika/','')}",
+        title=replace_strings(url),
         content=result.content.decode("utf-8"),
         created_at=datetime.now().timestamp(),
         link=url,
@@ -171,31 +199,11 @@ def main():
     articles = []
 
     soup = BeautifulSoup(page.content, "html.parser")
+
     for link in soup.findAll("a", attrs={"href": re.compile(r"zpravy-domov")}):
         articles.append(f"https://irozhlas.cz{link.get('href')}")
 
     for link in soup.findAll("a", attrs={"href": re.compile(r"ekonomika")}):
         articles.append(f"https://irozhlas.cz{link.get('href')}")
 
-    ### make the list unique
-    uniq_links = list(set(articles))
-
-    ### fix some typo
-    filtered = []
-    for article in uniq_links:
-        print(article)
-        filtered.append(
-            article.replace(
-                "https://irozhlas.czhttps://www.irozhlas.cz", "https://irozhlas.cz"
-            )
-        )
-
-    # print(uniq_links)
-
-    all_articles = []
-
-    for link in filtered:
-        all_articles.append(fetch_article_from_link(link))
-
-    for article in all_articles:
-        print(f"{article.title},{article.content}")
+    filter_strings(articles)
