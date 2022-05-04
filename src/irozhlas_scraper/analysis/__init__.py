@@ -34,35 +34,44 @@ __all__ = tuple(["main"])
 #                                  DOMAIN                                     #
 # ########################################################################### #
 
+
 @dataclass
-class Article: # DTO?
+class Article:  # DTO?
     id: UUID
     content: str
 
 
 @dataclass(frozen=True, eq=True)
-class Analysis: # DTO?
+class Analysis:  # DTO?
     """
     The text model contains the original and analyzed Article.
     """
-    id: UUID      # Original article id
+
+    id: UUID  # Original article id
     content: str  # Originla article analyzed content
+
 
 # Work in progress
 
-@dataclass
-class Command: ...
 
 @dataclass
-class Event: ...
+class Command:
+    ...
+
 
 @dataclass
-class AnalyzeArticle(Command): # DTO
+class Event:
+    ...
+
+
+@dataclass
+class AnalyzeArticle(Command):  # DTO
     article_id: str
     article_content: str
 
+
 @dataclass
-class ArticleAnalyzed(Command): # DTO
+class ArticleAnalyzed(Command):  # DTO
     article_id: str
     analysis_content: str
 
@@ -72,6 +81,7 @@ class ArticleAnalyzed(Command): # DTO
 # ########################################################################### #
 
 # Clieants for external services such as REST services and so on.
+
 
 class GeneeaClient:
     """
@@ -107,18 +117,21 @@ class GeneeaClient:
         """
         headers = {
             "Article-type": "application/json",
-            "Authorization": f"user_key {self.key}"
+            "Authorization": f"user_key {self.key}",
         }
 
-        response = rq.post(self.url, json = {"text": article.content}, headers=headers)
+        response = rq.post(self.url, json={"text": article.content}, headers=headers)
 
         if response.status_code != 200:
-            raise RequestException(f"Error for request with response status code {response.status_code}")
+            raise RequestException(
+                f"Error for request with response status code {response.status_code}"
+            )
 
         return Analysis(id=article.id, content=response.json())
 
 
 # Repositories for loading and saving the aggregates (entites) from some storage.
+
 
 class ArticleRepository:
     """
@@ -127,17 +140,18 @@ class ArticleRepository:
 
     This is in-memory implementation.
     """
+
     def __init__(self) -> None:
 
         self._storage: Dict[UUID, Article] = {
-            UUID("3107759e-fdf6-49ef-b224-3298926a20b7"):
-                Article(
-                    UUID("3107759e-fdf6-49ef-b224-3298926a20b7"),
-                    "Lezec Ondra si po boulderingu polepšil, patří mu šestá postupová příčka."),
-            UUID("a4b2eeda-af0e-40ea-a654-1b7c0a6e984e"):
-                Article(
-                    UUID("a4b2eeda-af0e-40ea-a654-1b7c0a6e984e"),
-                    "Hrozně jsem si přála hodit pro Janečka, posteskla si oštěpařka Špotáková"),
+            UUID("3107759e-fdf6-49ef-b224-3298926a20b7"): Article(
+                UUID("3107759e-fdf6-49ef-b224-3298926a20b7"),
+                "Lezec Ondra si po boulderingu polepšil, patří mu šestá postupová příčka.",
+            ),
+            UUID("a4b2eeda-af0e-40ea-a654-1b7c0a6e984e"): Article(
+                UUID("a4b2eeda-af0e-40ea-a654-1b7c0a6e984e"),
+                "Hrozně jsem si přála hodit pro Janečka, posteskla si oštěpařka Špotáková",
+            ),
         }
 
     def find_one(self, id: UUID) -> Optional[Article]:
@@ -161,6 +175,7 @@ class AnalysisRepository:
 
     This is in-memory implementation.
     """
+
     def __init__(self) -> None:
 
         self._storage: Dict[UUID, Article] = {}
@@ -179,7 +194,7 @@ class AnalysisRepository:
             self._storage[analysis.id] = analysis
 
 
-class ArticleAnalysisService: # Facade
+class ArticleAnalysisService:  # Facade
     """
     The main application service facade.
     The methods reflects business requirements aka use-cases.
@@ -192,16 +207,17 @@ class ArticleAnalysisService: # Facade
     :param article_storage: The repository for loading and saving analyses.
     """
 
-    def __init__(self,
+    def __init__(
+        self,
         geneea_client: GeneeaClient,
         article_storage: ArticleRepository,
-        analysis_storage: AnalysisRepository
+        analysis_storage: AnalysisRepository,
     ) -> None:
         self.geneea_client = geneea_client
         self.article_storage = article_storage
         self.analysis_storage = analysis_storage
 
-    def analyze_article(self, article_id: str): # ->  Result[None]
+    def analyze_article(self, article_id: str):  # ->  Result[None]
         """
         Analyze an article with the given id and store the result.
 
@@ -230,21 +246,23 @@ class ArticleAnalysisService: # Facade
                 return Exception(f"The article {article_id} could not be processed.")
 
             # Create the analysis domain object and store it.
-            analysis = Analysis(id = article_id, content = analyzed.content )
+            analysis = Analysis(id=article_id, content=analyzed.content)
             self.analysis_storage.save_one(analysis)
 
         except Exception as ex:
             raise ex
 
-    def retrive_analysis(self, article_id: str): # -> Result[None]
+    def retrive_analysis(self, article_id: str):  # -> Result[None]
         try:
             self.analysis_storage.find_one(article_id)
         except Exception as ex:
             raise ex
 
+
 # ########################################################################### #
 #                                 MAIN                                        #
 # ########################################################################### #
+
 
 def main(args=None) -> None:
     """
@@ -278,9 +296,9 @@ def main(args=None) -> None:
         analysis_storage = AnalysisRepository()
 
         service = ArticleAnalysisService(
-            geneea_client = geneea_client,
-            article_storage = article_storage,
-            analysis_storage = analysis_storage
+            geneea_client=geneea_client,
+            article_storage=article_storage,
+            analysis_storage=analysis_storage,
         )
         # ------------------------------------------------------------------------
         # EXECUTE WORKFLOW

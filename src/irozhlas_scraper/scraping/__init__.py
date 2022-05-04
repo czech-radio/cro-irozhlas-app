@@ -120,14 +120,14 @@ def save_index(page: Page, path: str) -> None:
         f.write(page.content)
 
 
-def fetch_article_from_link(url: str):
+def fetch_article_from_link(url: str) -> Article:
     result = requests.get(url)
     if not result.ok:
         raise requests.HTTPError
 
     return Article(
         id=uuid4(),
-        title="article",
+        title=f"{url.replace('https://irozhlas.cz/','').replace('_',' ').replace('-',' ').replace('ekonomika/','')}",
         content=result.content.decode("utf-8"),
         created_at=datetime.now().timestamp(),
         link=url,
@@ -177,13 +177,21 @@ def main():
     for link in soup.findAll("a", attrs={"href": re.compile(r"ekonomika")}):
         articles.append(f"https://irozhlas.cz{link.get('href')}")
 
+    ### make the list unique
     uniq_links = list(set(articles))
-    print(uniq_links)
+
+    ### fix some typo
+    filtered = []
+    for article in uniq_links:
+        print(article)
+        filtered.append(article.replace("https://irozhlas.czhttps://www.irozhlas.cz","https://irozhlas.cz"))
+
+    #print(uniq_links)
 
     all_articles = []
 
-    for link in uniq_links:
+    for link in filtered:
         all_articles.append(fetch_article_from_link(link))
 
     for article in all_articles:
-        print(f"{article.title}, {article.link}")
+        print(f"{article.title},{article.content}")
