@@ -120,28 +120,18 @@ def save_index(page: Page, path: str) -> None:
         f.write(page.content)
 
 
-def replace_strings(text: str) -> str:
+def derive_title(text: str) -> str:
     """Replace common patterns to create title of an Article"""
-    return f"{text.replace('https://irozhlas.cz/','').replace('_',' ').replace('-',' ').replace('ekonomika/','')}"
+    text.replace("https://irozhlas.czhttps://www.irozhlas.cz", "https://irozhlas.cz")
+    text.replace("https://irozhlas.cz/", "")
+    text.replace("_", " ")
+    text.replace("-", " ")
+    text.replace("ekonomika/", "")
+    return text
 
 
-def filter_strings(articles: tuple[Article]) -> str:
-    """Filter out common mistakes in URL parsing"""
-    uniq_links = list(set(articles))
-
-    ### fix some typo
-    filtered = []
-    for article in uniq_links:
-        filtered.append(
-            article.replace(
-                "https://irozhlas.czhttps://www.irozhlas.cz", "https://irozhlas.cz"
-            )
-        )
-
-    all_articles = []
-
-    for link in filtered:
-        all_articles.append(fetch_article_from_link(link))
+def parse_article_body(text: str):
+    return text
 
 
 def fetch_article_from_link(url: str) -> Article:
@@ -155,7 +145,7 @@ def fetch_article_from_link(url: str) -> Article:
 
     return Article(
         id=uuid4(),
-        title=replace_strings(url),
+        title=derive_title(url),
         content=result.content.decode("utf-8"),
         created_at=datetime.now().timestamp(),
         link=url,
@@ -196,14 +186,22 @@ def main():
 
     ### agregate links ###
 
-    articles = []
+    links = []
 
     soup = BeautifulSoup(page.content, "html.parser")
 
     for link in soup.findAll("a", attrs={"href": re.compile(r"zpravy-domov")}):
-        articles.append(f"https://irozhlas.cz{link.get('href')}")
+        links.append(f"https://irozhlas.cz{link.get('href')}")
 
     for link in soup.findAll("a", attrs={"href": re.compile(r"ekonomika")}):
-        articles.append(f"https://irozhlas.cz{link.get('href')}")
+        links.append(f"https://irozhlas.cz{link.get('href')}")
 
-    filter_strings(articles)
+    all_articles = []
+
+    for link in links:
+        try:
+            all_articles.append(fetch_article_from_link(link))
+        except Exception as ex:
+            print(f"Error getting article: {ex}")
+
+    print(all_articles)
