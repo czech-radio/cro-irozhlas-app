@@ -120,18 +120,44 @@ def save_index(page: Page, path: str) -> None:
         f.write(page.content)
 
 
+def filter_links(links: [str]) -> [str]:
+    """Filter out non-article URLs"""
+
+    filtered = []
+    for link in links:
+        if (
+            link == "https://irozhlas.cz/zpravy-domov"
+            or link == "https://irozhlas.cz/ekonomika"
+        ):
+            ...
+        else:
+            filtered.append(link)
+
+    return list(set(filtered))
+
+
 def derive_title(text: str) -> str:
-    """Replace common patterns to create title of an Article"""
-    text.replace("https://irozhlas.czhttps://www.irozhlas.cz", "https://irozhlas.cz")
-    text.replace("https://irozhlas.cz/", "")
-    text.replace("_", " ")
-    text.replace("-", " ")
-    text.replace("ekonomika/", "")
-    return text
+    return text[text.rfind("/") + 1 : len(text)]
 
 
-def parse_article_body(text: str):
-    return text
+def derive_category(url: str) -> str:
+
+    if url.find("ekonomika") > 0:
+        return "Ekonomika"
+
+    if url.find("zpravy-domov") > 0:
+        return "Domácí zprávy"
+
+
+def parse_article_body(html: str):
+    """
+    Strip HTML to pure text here
+    """
+
+    soup = BeautifulSoup(html, features="html.parser")
+    fulltext = soup.get_text()
+    # print(f"debug: {fulltext}")
+    return fulltext
 
 
 def fetch_article_from_link(url: str) -> Article:
@@ -146,10 +172,10 @@ def fetch_article_from_link(url: str) -> Article:
     return Article(
         id=uuid4(),
         title=derive_title(url),
-        content=result.content.decode("utf-8"),
+        content=parse_article_body(result.content.decode("utf-8")),
         created_at=datetime.now().timestamp(),
         link=url,
-        category="testcategory",
+        category=derive_category(url),
     )
 
 
@@ -196,6 +222,10 @@ def main():
     for link in soup.findAll("a", attrs={"href": re.compile(r"ekonomika")}):
         links.append(f"https://irozhlas.cz{link.get('href')}")
 
+    ### fetch and cast articles from links ###
+
+    links = filter_links(links)
+
     all_articles = []
 
     for link in links:
@@ -204,4 +234,7 @@ def main():
         except Exception as ex:
             print(f"Error getting article: {ex}")
 
-    print(all_articles)
+    for article in all_articles:
+        print(
+            f"{article._link}\n{article._title}\n{article._category}\n{article._created_at}"
+        )
