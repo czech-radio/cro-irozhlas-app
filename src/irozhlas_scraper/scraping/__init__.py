@@ -142,9 +142,9 @@ def derive_title(html: str) -> str:
     """
 
     soup = BeautifulSoup(html, features="html.parser")
-    title = soup.find('article').find('h1').get_text()
-    title = title.replace("\n","")
-    title = title.replace("  ","")
+    title = soup.find("article").find("h1").get_text()
+    title = title.replace("\n", "")
+    title = title.replace("  ", "")
     return title
 
 
@@ -163,24 +163,24 @@ def parse_article_body(html: str):
     """
 
     soup = BeautifulSoup(html, features="html.parser")
-    paragraphs = soup.find("div",{"class": "b-detail"}).find_all("p")
+    paragraphs = soup.find("div", {"class": "b-detail"}).find_all("p")
 
     fulltext = ""
     for p in paragraphs:
         fulltext = fulltext + p.get_text()
 
-    #.get_text()
-    fulltext = fulltext.replace("\n"," ")
-    fulltext = fulltext.replace("\t","")
-    fulltext = fulltext.replace("  ","")
-    fulltext = fulltext.replace("Sdílet na Facebooku","")
-    fulltext = fulltext.replace("Sdílet na Twitteru","")
-    fulltext = fulltext.replace("Sdílet na LinkedIn","")
-    fulltext = fulltext.replace("Zavřít","")
-    fulltext = fulltext.replace(" Tisknout","")
-    fulltext = fulltext.replace("Kopírovat url adresu","")
-    fulltext = fulltext.replace(" Zkrácená adresaKopírovat do schránky","")
-    #article_body = article_body[article_body.find("Zavřít")+6:len(article_body)]
+    # .get_text()
+    fulltext = fulltext.replace("\n", " ")
+    fulltext = fulltext.replace("\t", "")
+    fulltext = fulltext.replace("  ", "")
+    fulltext = fulltext.replace("Sdílet na Facebooku", "")
+    fulltext = fulltext.replace("Sdílet na Twitteru", "")
+    fulltext = fulltext.replace("Sdílet na LinkedIn", "")
+    fulltext = fulltext.replace("Zavřít", "")
+    fulltext = fulltext.replace(" Tisknout", "")
+    fulltext = fulltext.replace("Kopírovat url adresu", "")
+    fulltext = fulltext.replace(" Zkrácená adresaKopírovat do schránky", "")
+    # article_body = article_body[article_body.find("Zavřít")+6:len(article_body)]
     return fulltext
 
 
@@ -260,5 +260,5 @@ def main():
 
     for article in all_articles:
         print(
-                f"Title: {article._title}\nLink: {article._link}\nCategory: {article._category}\nDate: {article._created_at}\nText: {article._content}"
+            f"Title: {article._title}\nLink: {article._link}\nCategory: {article._category}\nDate: {article._created_at}\nText: {article._content}"
         )
