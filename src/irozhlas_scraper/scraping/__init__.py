@@ -170,16 +170,17 @@ def parse_article_body(html: str):
         fulltext = fulltext + p.get_text()
 
     # .get_text()
-    fulltext = fulltext.replace("\n", " ")
+    fulltext = fulltext.replace("\n\n", " ")
     fulltext = fulltext.replace("\t", "")
     fulltext = fulltext.replace("  ", "")
     fulltext = fulltext.replace("Sdílet na Facebooku", "")
     fulltext = fulltext.replace("Sdílet na Twitteru", "")
     fulltext = fulltext.replace("Sdílet na LinkedIn", "")
     fulltext = fulltext.replace("Zavřít", "")
-    fulltext = fulltext.replace(" Tisknout", "")
+    fulltext = fulltext.replace("Tisknout", "")
     fulltext = fulltext.replace("Kopírovat url adresu", "")
-    fulltext = fulltext.replace(" Zkrácená adresaKopírovat do schránky", "")
+    fulltext = fulltext.replace("Zkrácená adresa Kopírovat do schránky", "")
+    fulltext = fulltext.replace(" číst článek", "")
     # article_body = article_body[article_body.find("Zavřít")+6:len(article_body)]
     return fulltext
 
