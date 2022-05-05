@@ -136,8 +136,17 @@ def filter_links(links: [str]) -> [str]:
     return list(set(filtered))
 
 
-def derive_title(text: str) -> str:
-    return text[text.rfind("/") + 1 : len(text)]
+def derive_title(html: str) -> str:
+    """
+    get article machine title
+    """
+
+    soup = BeautifulSoup(html, features="html.parser")
+    title = soup.find('article').find('h1').get_text()
+    title = title.replace("\n","")
+    title = title.replace("  ","")
+    return title
+#return text[text.rfind("/") + 1 : len(text)]
 
 
 def derive_category(url: str) -> str:
@@ -155,8 +164,11 @@ def parse_article_body(html: str):
     """
 
     soup = BeautifulSoup(html, features="html.parser")
+    #print(soup.find('article'))
+
+
     fulltext = soup.get_text()
-    # print(f"debug: {fulltext}")
+    #print(f"debug: {fulltext}")
     return fulltext
 
 
@@ -171,7 +183,7 @@ def fetch_article_from_link(url: str) -> Article:
 
     return Article(
         id=uuid4(),
-        title=derive_title(url),
+        title=derive_title(result.content.decode("utf-8")),
         content=parse_article_body(result.content.decode("utf-8")),
         created_at=datetime.now().timestamp(),
         link=url,
@@ -236,5 +248,5 @@ def main():
 
     for article in all_articles:
         print(
-            f"{article._link}\n{article._title}\n{article._category}\n{article._created_at}"
+                f"Title: {article._title}\nLink: {article._link}\nCategory: {article._category}\nDate: {article._created_at}"
         )
