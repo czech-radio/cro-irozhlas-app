@@ -119,6 +119,16 @@ def save_index(page: Page, path: str) -> None:
     with open(f"{path}/{file_name}", mode="w+", encoding="utf-8") as f:
         f.write(page.content)
 
+def save_article(article: Article, path: str) -> None:
+    """Save article in text form
+    """
+
+    tmp_title = strip_title(article._link)
+    tmp_date = datetime.fromtimestamp(article._created_at).strftime('%Y-%m-%d')
+    filename = f"{tmp_date}_{tmp_title}.txt"
+
+    with open(f"{path}/{filename}", mode="w+", encoding="utf-8") as f:
+        f.write(article._content)
 
 def filter_links(links: [str]) -> [str]:
     """Filter out non-article URLs"""
@@ -135,6 +145,9 @@ def filter_links(links: [str]) -> [str]:
 
     return list(set(filtered))
 
+
+def strip_title(url: str) -> str:
+    return (url[url.rfind("/")+1:len(url)])
 
 def derive_title(html: str) -> str:
     """
@@ -260,6 +273,7 @@ def main():
             print(f"Error getting article: {ex}")
 
     for article in all_articles:
+        save_article(article,"output")
         print(
             f"Title: {article._title}\nLink: {article._link}\nCategory: {article._category}\nDate: {article._created_at}\nText: {article._content}"
         )
