@@ -119,19 +119,101 @@ def save_index(page: Page, path: str) -> None:
     with open(f"{path}/{file_name}", mode="w+", encoding="utf-8") as f:
         f.write(page.content)
 
+def save_article(article: Article, path: str) -> None:
+    """Save article in text form
+    """
+
+    tmp_title = strip_title(article._link)
+    tmp_date = datetime.fromtimestamp(article._created_at).strftime('%Y-%m-%d')
+    filename = f"{tmp_date}_{tmp_title}.txt"
+
+    with open(f"{path}/{filename}", mode="w+", encoding="utf-8") as f:
+        f.write(article._content)
+
+def filter_links(links: [str]) -> [str]:
+    """Filter out non-article URLs"""
+
+    filtered = []
+    for link in links:
+        if (
+            link == "https://irozhlas.cz/zpravy-domov"
+            or link == "https://irozhlas.cz/ekonomika"
+        ):
+            ...
+        else:
+            filtered.append(link)
+
+    return list(set(filtered))
+
+
+def strip_title(url: str) -> str:
+    return (url[url.rfind("/")+1:len(url)])
+
+def derive_title(html: str) -> str:
+    """
+    get article machine title
+    """
+
+    soup = BeautifulSoup(html, features="html.parser")
+    title = soup.find("article").find("h1").get_text()
+    title = title.replace("\n", "")
+    title = title.replace("  ", "")
+    return title
+
+
+def derive_category(url: str) -> str:
+
+    if url.find("ekonomika") > 0:
+        return "Ekonomika"
+
+    if url.find("zpravy-domov") > 0:
+        return "Domácí zprávy"
+
+
+def parse_article_body(html: str):
+    """
+    Strip HTML to pure text here
+    """
+
+    soup = BeautifulSoup(html, features="html.parser")
+    paragraphs = soup.find("div", {"class": "b-detail"}).find_all("p")
+
+    fulltext = ""
+    for p in paragraphs:
+        fulltext = fulltext + p.get_text()
+
+    # .get_text()
+    fulltext = fulltext.replace("\n\n", " ")
+    fulltext = fulltext.replace("\t", "")
+    fulltext = fulltext.replace("  ", "")
+    fulltext = fulltext.replace("Sdílet na Facebooku", "")
+    fulltext = fulltext.replace("Sdílet na Twitteru", "")
+    fulltext = fulltext.replace("Sdílet na LinkedIn", "")
+    fulltext = fulltext.replace("Zavřít", "")
+    fulltext = fulltext.replace("Tisknout", "")
+    fulltext = fulltext.replace("Kopírovat url adresu", "")
+    fulltext = fulltext.replace("Zkrácená adresa Kopírovat do schránky", "")
+    fulltext = fulltext.replace(" číst článek", "")
+    # article_body = article_body[article_body.find("Zavřít")+6:len(article_body)]
+    return fulltext
+
 
 def fetch_article_from_link(url: str) -> Article:
+    """
+    Calls IO/NET URL and returns Article object
+    """
+
     result = requests.get(url)
     if not result.ok:
         raise requests.HTTPError
 
     return Article(
         id=uuid4(),
-        title=f"{url.replace('https://irozhlas.cz/','').replace('_',' ').replace('-',' ').replace('ekonomika/','')}",
-        content=result.content.decode("utf-8"),
+        title=derive_title(result.content.decode("utf-8")),
+        content=parse_article_body(result.content.decode("utf-8")),
         created_at=datetime.now().timestamp(),
         link=url,
-        category="testcategory",
+        category=derive_category(url),
     )
 
 
@@ -168,34 +250,30 @@ def main():
 
     ### agregate links ###
 
-    articles = []
+    links = []
 
     soup = BeautifulSoup(page.content, "html.parser")
+
     for link in soup.findAll("a", attrs={"href": re.compile(r"zpravy-domov")}):
-        articles.append(f"https://irozhlas.cz{link.get('href')}")
+        links.append(f"https://irozhlas.cz{link.get('href')}")
 
     for link in soup.findAll("a", attrs={"href": re.compile(r"ekonomika")}):
-        articles.append(f"https://irozhlas.cz{link.get('href')}")
+        links.append(f"https://irozhlas.cz{link.get('href')}")
 
-    ### make the list unique
-    uniq_links = list(set(articles))
+    ### fetch and cast articles from links ###
 
-    ### fix some typo
-    filtered = []
-    for article in uniq_links:
-        print(article)
-        filtered.append(
-            article.replace(
-                "https://irozhlas.czhttps://www.irozhlas.cz", "https://irozhlas.cz"
-            )
-        )
-
-    # print(uniq_links)
+    links = filter_links(links)
 
     all_articles = []
 
-    for link in filtered:
-        all_articles.append(fetch_article_from_link(link))
+    for link in links:
+        try:
+            all_articles.append(fetch_article_from_link(link))
+        except Exception as ex:
+            print(f"Error getting article: {ex}")
 
     for article in all_articles:
-        print(f"{article.title},{article.content}")
+        save_article(article,"output")
+        print(
+            f"Title: {article._title}\nLink: {article._link}\nCategory: {article._category}\nDate: {article._created_at}\nText: {article._content}"
+        )
