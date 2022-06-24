@@ -2,7 +2,7 @@
 
 _The iRozhlas scraping and analysing service._
 
-![main](https://github.com/czech-radio/irozhlas-scraper/workflows/main/badge.svg) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+![main](https://github.com/czech-radio/cro-irozhlas-app/workflows/main/badge.svg)
 
 Tested on latest Ubuntu and Windows OS.
 
@@ -18,16 +18,18 @@ The program should be accessible from command line with apropriate interface e.g
 At this moment we think that the project can be splited into two parts (modules/packages) where every
 package can be viwed and used as a standalone application. They are currently executed vis scripts (see `setup.cfg`).
 
-- `scraping` The scraping package (module) is responsible for fetching, parsing and storing the irozhlas.cz pages such as index page and individual articles found on index page.
-- `analysis` The analysis package (module) is responsible for posting the stored articles to Geneea service, processing and storing the results in database.
+- `scraper` The scraping package (module) is responsible for fetching, parsing and storing the irozhlas.cz pages such as index page and individual articles found on index page.
+- `analyser` The analysis package (module) is responsible for posting the stored articles to Geneea service, processing and storing the results in database.
 - `website` The web application for managing and viewing the analysed articles.
 
 ## Usage
 
 Then you can use it as
 
-    irozhlas-scrape ...
-    irozhlas-analyse ...
+```
+irozhlas-scrape ...
+irozhlas-analyse ...
+```
 
 ## Setup
 

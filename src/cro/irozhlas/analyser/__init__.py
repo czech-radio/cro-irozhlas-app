@@ -2,6 +2,10 @@
 
 
 """
+This service is responsible for analyzing the given article content by 
+calling Geneea REST service and store the result in database.
+
+
 Example how to use Geneea API in three simple steps:
 
 1. Load the input data
@@ -25,13 +29,16 @@ from typing import Dict, Optional
 from requests.exceptions import RequestException
 from typing import Protocol
 
+
+from cro.gennea.sdk import Client as GeneeaClient
+
 from dotenv import load_dotenv, dotenv_values
 
 
 __all__ = tuple(["main"])
 
 # ########################################################################### #
-#                                  DOMAIN                                     #
+#                                  MODELS                                     #
 # ########################################################################### #
 
 
@@ -79,56 +86,6 @@ class ArticleAnalyzed(Command):  # DTO
 # ########################################################################### #
 #                                 SERVICE                                     #
 # ########################################################################### #
-
-# Clieants for external services such as REST services and so on.
-
-
-class GeneeaClient:
-    """
-    The Geneea service client is responsible for calling Geneea REST service
-    and analyze the provided article.
-    """
-
-    def __init__(self, url: str, key: str) -> None:
-        self._url = url
-        self._key = key
-
-    @property
-    def key(self) -> str:
-        """
-        :return The service key.
-        """
-        return self._key
-
-    @property
-    def url(self) -> str:
-        """
-        :return The service url.
-        """
-        return self._url
-
-    def process(self, article: Article) -> Analysis:
-        """
-        For each text from thegiven collection call tge GENEEA service
-        process the text and yield a result.
-
-        :param texts:
-        :yield:
-        """
-        headers = {
-            "Article-type": "application/json",
-            "Authorization": f"user_key {self.key}",
-        }
-
-        response = rq.post(self.url, json={"text": article.content}, headers=headers)
-
-        if response.status_code != 200:
-            raise RequestException(
-                f"Error for request with response status code {response.status_code}"
-            )
-
-        return Analysis(id=article.id, content=response.json())
-
 
 # Repositories for loading and saving the aggregates (entites) from some storage.
 

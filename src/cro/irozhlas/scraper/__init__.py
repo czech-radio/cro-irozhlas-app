@@ -4,12 +4,20 @@ import re
 from bs4 import BeautifulSoup
 import requests
 
+from typing import Optional
 from uuid import UUID, uuid4
 from datetime import date
 from datetime import datetime
 
 
 __all__ = tuple(["main"])
+
+
+# ########################################################################### #
+#                                 MODELS                                      #
+# ########################################################################### #
+
+URL = str
 
 
 class Page:
@@ -90,12 +98,27 @@ class Article:
         return hash((type(self), self.id))
 
 
+# ########################################################################### #
+# REPOSITORY
+# ########################################################################### #
+
+
+class PageRepository:
+    """
+    The repsitory to save and load the HTML iRozhlas index pages.
+    """
+
+
 # #############################################################################
 # [1] Fetch and save the index page.
 # #############################################################################
 
+class Scraper:
+    def __init__(self, *args, **kwargs):
+        ...
 
-def fetch_index(url: str) -> Page:
+
+def fetch_index(url: URL) -> Page:
     """
     Fetch the index page.
     :raise: The `HTTPError` on no-200 status code.
@@ -119,6 +142,7 @@ def save_index(page: Page, path: str) -> None:
     with open(f"{path}/{file_name}", mode="w+", encoding="utf-8") as f:
         f.write(page.content)
 
+
 def save_article(article: Article, path: str) -> None:
     """Save article in text form
     """
@@ -130,44 +154,44 @@ def save_article(article: Article, path: str) -> None:
     with open(f"{path}/{filename}", mode="w+", encoding="utf-8") as f:
         f.write(article._content)
 
-def filter_links(links: [str]) -> [str]:
-    """Filter out non-article URLs"""
 
-    filtered = []
-    for link in links:
-        if (
-            link == "https://irozhlas.cz/zpravy-domov"
-            or link == "https://irozhlas.cz/ekonomika"
-        ):
-            ...
-        else:
-            filtered.append(link)
-
-    return list(set(filtered))
+def filter_links(links: list[URL], exclude: Iterable[URL]) -> list[URL]:
+    """
+    Filter out non-article URLs.
+    """
+    result = list(set([link for link in links if link not in exclude])) 
+    
+    return result
 
 
 def strip_title(url: str) -> str:
+    """
+    :param url: The URL.
+    """
     return (url[url.rfind("/")+1:len(url)])
+
 
 def derive_title(html: str) -> str:
     """
-    get article machine title
+    Get  the article machine title.
     """
-
     soup = BeautifulSoup(html, features="html.parser")
+    
     title = soup.find("article").find("h1").get_text()
     title = title.replace("\n", "")
     title = title.replace("  ", "")
+
     return title
 
 
-def derive_category(url: str) -> str:
-
+def derive_category(url: str) -> Optional[str]:
     if url.find("ekonomika") > 0:
         return "Ekonomika"
 
     if url.find("zpravy-domov") > 0:
         return "Domácí zprávy"
+
+    return None
 
 
 def parse_article_body(html: str):
@@ -217,63 +241,4 @@ def fetch_article_from_link(url: str) -> Article:
     )
 
 
-class IndexContentStore:
-    """
-    The repsitory class to save and load the HTML irozhlas index pages.
-    """
 
-    def __init__(self):
-        ...
-
-    def save(self, meta) -> None:
-        ...
-
-    def load(self) -> str:
-        ...
-
-
-# #############################################################################
-# [2] Parse the index page content.
-# #############################################################################
-
-
-def main():
-    try:
-        config = {"url": "https://irozhlas.cz/"}
-
-        page = fetch_index(url=config["url"])
-
-        save_index(page, ".")
-
-    except Exception as ex:
-        print(ex)
-
-    ### agregate links ###
-
-    links = []
-
-    soup = BeautifulSoup(page.content, "html.parser")
-
-    for link in soup.findAll("a", attrs={"href": re.compile(r"zpravy-domov")}):
-        links.append(f"https://irozhlas.cz{link.get('href')}")
-
-    for link in soup.findAll("a", attrs={"href": re.compile(r"ekonomika")}):
-        links.append(f"https://irozhlas.cz{link.get('href')}")
-
-    ### fetch and cast articles from links ###
-
-    links = filter_links(links)
-
-    all_articles = []
-
-    for link in links:
-        try:
-            all_articles.append(fetch_article_from_link(link))
-        except Exception as ex:
-            print(f"Error getting article: {ex}")
-
-    for article in all_articles:
-        save_article(article,"output")
-        print(
-            f"Title: {article._title}\nLink: {article._link}\nCategory: {article._category}\nDate: {article._created_at}\nText: {article._content}"
-        )
